@@ -1,0 +1,8 @@
+com\empleadosjpa\persistencia\exceptions\IllegalOrphanException.class
+com\empleadosjpa\logica\Empleados_.class
+com\empleadosjpa\EmpleadosJpa.class
+com\empleadosjpa\persistencia\exceptions\PreexistingEntityException.class
+com\empleadosjpa\persistencia\EmpleadosJpaController.class
+com\empleadosjpa\persistencia\ControladoraPersistencia.class
+com\empleadosjpa\logica\Empleados.class
+com\empleadosjpa\persistencia\exceptions\NonexistentEntityException.class
