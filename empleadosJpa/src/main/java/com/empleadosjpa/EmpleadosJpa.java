@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 
 public class EmpleadosJpa {
 
@@ -26,10 +28,7 @@ public class EmpleadosJpa {
         //Creamos la BD
         ControladoraPersistencia controlPersis = new ControladoraPersistencia();
         
-        //Almacenamos la lista de empleados debido a que se prevee que se llamará desde distintas opciones del programa, para no tener que importar la misma usando distintas variables
-        List<Empleados> listaEmpleados = controlPersis.traerEmpleados();
-        
-        //Solicitamos los datos al usuario para crear los objetos empleado
+        //Solicitamos los datos al usuario para crear los objetos empleados
         System.out.println("**** BIENVENIDO AL SISTEMA DE CONTROL DE EMPLEADOS ****");
         while(seguir == true){
             System.out.println("Indique qué desea realizar: (1: Crear empleados, 2: Listar empleados creados, 3: Actualizar datos de empleados, 4: Eliminar empleados, 5: Buscar empleados por cargo, Otro: Salir del sistema)");
@@ -42,37 +41,21 @@ public class EmpleadosJpa {
                         int id = 1;
                         System.out.println("Introduzca el nombre del empleado: ");
                         nombre = sc.nextLine();
-                        while(nombre.equals("")){
-                            System.out.println("**** ERROR ****\nDebe introducir el nombre del empleado");
-                            nombre = sc.nextLine();
-                        }
                         System.out.println("Introduzca el apellido del empleado: ");
                         apellido = sc.nextLine();
-                        while(apellido.equals("")){
-                            System.out.println("**** ERROR ****\nDebe introducir el apellido del empleado");
-                            apellido = sc.nextLine();
-                        }
                         System.out.println("Introduzca el cargo del empleado: ");
                         cargo = sc.nextLine();
-                        while(cargo.equals("")){
-                            System.out.println("**** ERROR ****\nDebe introducir el cargo del empleado");
-                            cargo = sc.nextLine();
-                        }
                         System.out.println("Introduzca el salario del empleado: ");
                         salario = sc.nextDouble();
-                        while(salario == 0.0){
-                            System.out.println("ERROR: Debe introducir el salario del empleado: ");
-                            salario = sc.nextDouble();
-                        }
                         saltoLinea = sc.nextLine();
                         System.out.println("Introduzca la fecha de inicio del empleado: ");
                         fechaInicio = sc.nextLine();
-                        while(fechaInicio.equals("")){
-                            System.out.println("**** ERROR ****\nDebe introducir la fecha de inicio del empleado");
-                            fechaInicio = sc.nextLine();
+                        try{
+                            empleados.add (new Empleados(id, nombre, apellido, cargo, salario, fechaInicio));
+                            id++;
+                        }catch(Exception e){
+                            System.out.println("Se produjo una excepción personalizada: " + e.getMessage());
                         }
-                        empleados.add (new Empleados(id, nombre, apellido, cargo, salario, fechaInicio));
-                        id++;
                         //Se solicita confirmación sobre si desea introducir más usuarios al sistema o se vuelve al menú principal de la aplicación
                         System.out.println("¿Desea añadir más empleados? (1: Sí)");
                         if(sc.nextInt() != 1)
@@ -88,14 +71,14 @@ public class EmpleadosJpa {
                     //Se muestra el listado de empleados que se encuentran actualmente en la BD
                     System.out.println("Mostrar usuarios");
                     //Se realiza un control para que, en caso de no existir registros, se muestre un mensaje de error pero se pueda continuar en la aplicación
-                    listaEmpleados = controlPersis.traerEmpleados();
-                    if(listaEmpleados.isEmpty()){
-                        System.out.println("No existen empleados actualmente.");
-                    }else{
+                    try{
+                        List<Empleados> listaEmpleados = controlPersis.traerEmpleados();
                         System.out.println("**** LISTA DE LOS EMPLEADOS ACTUALES ****");
                         for(Empleados datosEmpleados : listaEmpleados){
                             System.out.println(datosEmpleados.toString());
                         }
+                    }catch(Exception e){
+                        System.out.println("Se produjo una excepción personalizada: " + e.getMessage()); 
                     }
                     break;
                 case 3:
@@ -103,11 +86,8 @@ public class EmpleadosJpa {
                     saltoLinea = sc.nextLine();
                     System.out.println("Actualizar usuario");
                     //Se muestra la lista actual de los empleados existentes
-                    listaEmpleados = controlPersis.traerEmpleados();
-                    if(listaEmpleados.isEmpty()){
-                        System.out.println("No existen empleados actualmente.");
-                    }else{
-                        //Se muestra el listado de los empleados actuales
+                    try{
+                        List<Empleados> listaEmpleados = controlPersis.traerEmpleados();
                         System.out.println("**** LISTA DE LOS EMPLEADOS ACTUALES ****");
                         for(Empleados datosEmpleados : listaEmpleados){
                             System.out.println(datosEmpleados.toString());
@@ -117,13 +97,7 @@ public class EmpleadosJpa {
                         while(contId == 0){
                             System.out.println("Introduzca el Id del empleado que desea actualizar");
                             int id = sc.nextInt();
-                            for(Empleados idEmpleados : listaEmpleados){
-                                if(idEmpleados.getId() == id)
-                                    contId += 1;
-                            }
-                            if(contId == 0){
-                                System.out.println("**** ERROR ****\nEl id introducido no corresponde con ningún empleado.");
-                            }else{
+                            try{
                                 Empleados actualizarEmpleado = controlPersis.traerEmpleado(id);
                                 //Se muestran los datos del empleado
                                 Empleados empleadoNuevo = new Empleados(actualizarEmpleado.getId(), actualizarEmpleado.getNombre(), actualizarEmpleado.getApellido(), actualizarEmpleado.getCargo(), actualizarEmpleado.getSalario(), actualizarEmpleado.getFechaInicio());
@@ -138,47 +112,73 @@ public class EmpleadosJpa {
                                             saltoLinea = sc.nextLine();
                                             System.out.println("Introduzca el nombre del empleado: ");
                                             nombre = sc.nextLine();
-                                            empleadoNuevo = new Empleados(actualizarEmpleado.getId(), nombre, actualizarEmpleado.getApellido(), actualizarEmpleado.getCargo(), actualizarEmpleado.getSalario(), actualizarEmpleado.getFechaInicio());
-                                            controlPersis.actualizarEmpleado(empleadoNuevo);
+                                            try{
+                                                empleadoNuevo = new Empleados(actualizarEmpleado.getId(), nombre, actualizarEmpleado.getApellido(), actualizarEmpleado.getCargo(), actualizarEmpleado.getSalario(), actualizarEmpleado.getFechaInicio());
+                                                controlPersis.actualizarEmpleado(empleadoNuevo);
+                                                contId++;
+                                            }catch(Exception e){
+                                                System.out.println("Se produjo una excepción personalizada: " + e.getMessage());
+                                            }
                                             error = false;
                                             break;
                                         case 2:
                                             saltoLinea = sc.nextLine();
                                             System.out.println("Introduzca el apellido del empleado: ");
                                             apellido = sc.nextLine();
-                                            empleadoNuevo = new Empleados(actualizarEmpleado.getId(), actualizarEmpleado.getNombre(), apellido, actualizarEmpleado.getCargo(), actualizarEmpleado.getSalario(), actualizarEmpleado.getFechaInicio());
-                                            controlPersis.actualizarEmpleado(empleadoNuevo);
+                                            try{
+                                                empleadoNuevo = new Empleados(actualizarEmpleado.getId(), actualizarEmpleado.getNombre(), apellido, actualizarEmpleado.getCargo(), actualizarEmpleado.getSalario(), actualizarEmpleado.getFechaInicio());
+                                                controlPersis.actualizarEmpleado(empleadoNuevo);
+                                                contId++;
+                                            }catch(Exception e){
+                                                System.out.println("Se produjo una excepción personalizada: " + e.getMessage());
+                                            }
                                             error = false;
                                             break;
                                         case 3:
                                             saltoLinea = sc.nextLine();
                                             System.out.println("Introduzca el cargo del empleado: ");
                                             cargo = sc.nextLine();
-                                            empleadoNuevo = new Empleados(actualizarEmpleado.getId(), actualizarEmpleado.getNombre(), actualizarEmpleado.getApellido(), cargo, actualizarEmpleado.getSalario(), actualizarEmpleado.getFechaInicio());
-                                            controlPersis.actualizarEmpleado(empleadoNuevo);
+                                            try{
+                                                empleadoNuevo = new Empleados(actualizarEmpleado.getId(), actualizarEmpleado.getNombre(), actualizarEmpleado.getApellido(), cargo, actualizarEmpleado.getSalario(), actualizarEmpleado.getFechaInicio());
+                                                controlPersis.actualizarEmpleado(empleadoNuevo);
+                                                contId++;
+                                            }catch(Exception e){
+                                                System.out.println("Se produjo una excepción personalizada: " + e.getMessage());
+                                            }
                                             error = false;
                                             break;
                                         case 4:
                                             saltoLinea = sc.nextLine();
                                             System.out.println("Introduzca el salario del empleado: ");
                                             salario = sc.nextDouble();
-                                            empleadoNuevo = new Empleados(actualizarEmpleado.getId(), actualizarEmpleado.getNombre(), actualizarEmpleado.getApellido(), actualizarEmpleado.getCargo(), salario, actualizarEmpleado.getFechaInicio());
-                                            controlPersis.actualizarEmpleado(empleadoNuevo);
+                                            try{
+                                                empleadoNuevo = new Empleados(actualizarEmpleado.getId(), actualizarEmpleado.getNombre(), actualizarEmpleado.getApellido(), actualizarEmpleado.getCargo(), salario, actualizarEmpleado.getFechaInicio());
+                                                controlPersis.actualizarEmpleado(empleadoNuevo);
+                                                contId++;
+                                            }catch(Exception e){
+                                                System.out.println("Se produjo una excepción personalizada: " + e.getMessage());
+                                            }
                                             error = false;
                                             break;
                                         case 5:
                                             saltoLinea = sc.nextLine();
                                             System.out.println("Introduzca la fecha de inicio del empleado: ");
                                             fechaInicio = sc.nextLine();
-                                            empleadoNuevo = new Empleados(actualizarEmpleado.getId(), actualizarEmpleado.getNombre(), actualizarEmpleado.getApellido(), actualizarEmpleado.getCargo(), actualizarEmpleado.getSalario(), fechaInicio);
-                                            controlPersis.actualizarEmpleado(empleadoNuevo);
+                                            try{
+                                                empleadoNuevo = new Empleados(actualizarEmpleado.getId(), actualizarEmpleado.getNombre(), actualizarEmpleado.getApellido(), actualizarEmpleado.getCargo(), actualizarEmpleado.getSalario(), fechaInicio);
+                                                controlPersis.actualizarEmpleado(empleadoNuevo);
+                                                contId++;
+                                            }catch(Exception e){
+                                                System.out.println("Se produjo una excepción personalizada: " + e.getMessage());
+                                            }
                                             error = false;
                                             break;
                                         default:
                                             System.out.println("ERROR: La opción introducida no es válida");
-
                                     }
                                 }
+                            }catch(Exception e){
+                                System.out.println("Se produjo una excepción personalizada: " + e.getMessage());
                             }
                         }
                         //Se muestra la lista actualizada de los empleados existentes
@@ -187,30 +187,36 @@ public class EmpleadosJpa {
                         for(Empleados datosEmpleados : listaEmpleadosNew){
                             System.out.println(datosEmpleados.toString());
                         }
+                    }catch(Exception e){
+                        System.out.println("Se produjo una excepción personalizada: " + e.getMessage()); 
                     }
                     break;
                 case 4:
                     //Si el usuario desea eliminar a algún empleado, inicialmente se comprobará que existen registros en la tabla, y de no ser así, se mostrará un mensaje de error y se le devolverá al menú principal
                     saltoLinea = sc.nextLine();
                     System.out.println("Eliminar usuario");
-                    //Se muestra la lista actual de los empleados existentes
-                    listaEmpleados = controlPersis.traerEmpleados();
-                    if(listaEmpleados.isEmpty()){
-                        System.out.println("No existen empleados actualmente.");
-                    }else{
+                    try{
+                        //Se muestra la lista actual de los empleados existentes
+                        List<Empleados> listaEmpleados = controlPersis.traerEmpleados();
                         System.out.println("**** LISTA DE LOS EMPLEADOS ACTUALES ****");
                         for(Empleados datosEmpleados : listaEmpleados){
                             System.out.println(datosEmpleados.toString());
                         }
                         //Se solicita que se indique el empleado que se quiere eliminar
                         System.out.println("Indique el Id del empleado que desea eliminar");
-                        controlPersis.eliminarEmpleado(sc.nextInt());
-                        //Se muestra la lista actualizada de los empleados existentes
-                        List<Empleados> listaEmpleadosNew = controlPersis.traerEmpleados();
-                        System.out.println("**** LISTA DE LOS EMPLEADOS ACTUALIZADA ****");
-                        for(Empleados datosEmpleados : listaEmpleadosNew){
-                            System.out.println(datosEmpleados.toString());
+                        try{
+                            controlPersis.eliminarEmpleado(sc.nextInt());
+                            //Se muestra la lista actualizada de los empleados existentes
+                            List<Empleados> listaEmpleadosNew = controlPersis.traerEmpleados();
+                            System.out.println("**** LISTA DE LOS EMPLEADOS ACTUALIZADA ****");
+                            for(Empleados datosEmpleados : listaEmpleadosNew){
+                                System.out.println(datosEmpleados.toString());
+                            }
+                        }catch(Exception e){
+                            System.out.println("Se produjo una excepción personalizada: " + e.getMessage()); 
                         }
+                    }catch(Exception e){
+                        System.out.println("Se produjo una excepción personalizada: " + e.getMessage()); 
                     }
                     break;
                 case 5:
@@ -218,21 +224,29 @@ public class EmpleadosJpa {
                     saltoLinea = sc.nextLine();
                     System.out.println("Introduzca el cargo que desea buscar");
                     String filtroCargo = sc.nextLine();
-                    listaEmpleados = controlPersis.traerEmpleados();
-                    ArrayList<Empleados> empleadosCargo = new ArrayList<>();
-                    for(Empleados filtroEmpleados : listaEmpleados){
-                        if(filtroEmpleados.getCargo().equals(filtroCargo))
-                            //Se almacenan los registros que coincidan con el cargo introducido en una ArrayList
-                            empleadosCargo.add(filtroEmpleados);
+                    while(filtroCargo.isEmpty() || filtroCargo == "" || filtroCargo == null){
+                        System.out.println("Debe introducir el cargo que desea filtrar.");
+                        filtroCargo = sc.nextLine();
                     }
-                    //Se controla que, en caso de no existir registros que coincidan con el cargo introducido, muestre un error y devuelva al usuario al menú principal
-                    if(empleadosCargo.isEmpty())
-                        System.out.println("No se han encontrado empleados con este cargo.");
-                    else
-                        System.out.println("Empleados con el cargo " + filtroCargo);
+                    try{
+                        List<Empleados> listaEmpleados = controlPersis.traerEmpleados();
+                        ArrayList<Empleados> empleadosCargo = new ArrayList<>();
+                        for(Empleados filtroEmpleados : listaEmpleados){
+                            if(filtroEmpleados.getCargo().equals(filtroCargo))
+                                //Se almacenan los registros que coincidan con el cargo introducido en una ArrayList
+                                empleadosCargo.add(filtroEmpleados);
+                        }
+                        //Se controla que, en caso de no existir registros que coincidan con el cargo introducido, muestre un error y devuelva al usuario al menú principal
+                        if(empleadosCargo.isEmpty())
+                            System.out.println("No se han encontrado empleados con este cargo.");
+                        else
+                            System.out.println("Empleados con el cargo " + filtroCargo);
                         for(Empleados resultadoFiltro : empleadosCargo){
                             System.out.println(resultadoFiltro.toString());
                         }
+                    }catch(Exception e){
+                        System.out.println("Se produjo una excepción personalizada: " + e.getMessage()); 
+                    }
                     break;
                 default:
                     seguir = false;

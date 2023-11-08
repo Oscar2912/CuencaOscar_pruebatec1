@@ -13,12 +13,26 @@ public class ControladoraPersistencia {
         empleadosJPA.create(empleado);
     }
     
-    public List<Empleados> traerEmpleados (){
-        return empleadosJPA.findEmpleadosEntities();
+    public List<Empleados> traerEmpleados () throws Exception{
+        if(empleadosJPA.findEmpleadosEntities().isEmpty()){
+            throw new Exception ("No existen actualmente empleados en la BD.");
+        }else{
+            return empleadosJPA.findEmpleadosEntities();
+        }  
     }
     
-    public Empleados traerEmpleado (int id){
-        return empleadosJPA.findEmpleados(id);
+    public Empleados traerEmpleado (int id) throws Exception{
+        int empleado = 0;
+        for(Empleados buscarEmpleado : traerEmpleados()){
+            if(buscarEmpleado.getId() == id){
+                empleado++;
+            }
+        }
+        if(empleado > 0){
+            return empleadosJPA.findEmpleados(id);
+        }else{
+            throw new Exception ("No existe este empleado en la BD.");
+        }  
     }
     
     public void actualizarEmpleado (Empleados empleado){
@@ -29,11 +43,17 @@ public class ControladoraPersistencia {
         }
     }
     
-    public void eliminarEmpleado (int id){
-        try {
+    public void eliminarEmpleado (int id) throws Exception{
+        int empleado = 0;
+        for(Empleados buscarEmpleado : traerEmpleados()){
+            if(buscarEmpleado.getId() == id){
+                empleado++;
+            }
+        }
+        if(empleado > 0){
             empleadosJPA.destroy(id);
-        } catch (NonexistentEntityException ex) {
-            Logger.getLogger(ControladoraPersistencia.class.getName()).log(Level.SEVERE, null, ex);
+        }else{
+            throw new Exception ("No existe este empleado en la BD.");
         }
     }
 }
